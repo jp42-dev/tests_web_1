@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Echiquier</title>
+<style>
+  #canvas-container {
+      display: flex;
+  }
+
+  #canvas {
+      border: 1px solid black;
+  }
+
+  #button-container {
+      display: flex;
+      flex-direction: column;
+      margin-right: 20px;
+  }
+
+  .button {
+      margin: 5px 0;
+      padding: 10px;
+      background-color: #0074d9;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+  }
+</style>
+</head>
+
+<body>
+
+  <div id="canvas-container">
+    <div id="button-container">
+        <button class="button" onclick="DessinerEchiquier(40,40,50,'Cyan','MidnightBlue')">Echiquier</button>
+        <button class="button" onclick="Dessiner16Echiquiers()">16 &eacute;chiquiers HSV</button>
+        <button class="button" onclick="DessinerAnimationEchiquier(40,40,70,'Cyan','Maroon')">Animation Echiquier</button>
+        <button class="button" onclick="DessinerAnimationContinueEchiquier(10,10,10)">Animation continue Echiquier</button>
+        <!-- <button class="button" onclick="clearCanvas()">Clear</button> -->
+    </div>
+    <canvas id="canvas" width="800" height="800"></canvas>
+  </div>
+
+<script type='text/javascript'>
+
+// not related
+// https://codesandbox.io/s/svg-filter-cloud-b92to?file=/src/index.js
+// https://developer.mozilla.org/fr/docs/Web/API/WebGL_API/Tutorial/Creating_3D_objects_using_WebGL
+// https://developer.mozilla.org/fr/docs/Web/API/WebGL_API/Tutorial/Animating_objects_with_WebGL
+// https://css-tricks.com/drawing-realistic-clouds-with-svg-and-css/
+// http://get.webgl.org/
+// https://www.khronos.org/blog/live-gltf-asset-editing-in-your-browsereven-in-ar
+
+
+var canvas = document.getElementById('canvas');
+var ctx;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function DessinerEchiquier(x,y,cote,color1,color2) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (var row = 0; row < 8; row++) {
+    // alert(`Row ${row}`);
+    for (var column = 0; column < 8; column++) {
+      // ctx.fillStyle = (row+column)%2 ? color2 : color1;
+      if ((row+column)%2 == 0) {
+        ctx.fillStyle = color1;
+      }
+      else{
+        ctx.fillStyle = color2;
+      }
+      ctx.fillRect(x+cote*column,y+cote*row,cote,cote);
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function DessinerAnimationEchiquier(x,y,cote,color1,color2) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // let params={x:x,y:y,cote:cote,color1:color1,color2:color2};
+  
+  // debugger;
+  // console.log(params);
+
+  for (let row = 0; row < 8; row++) {
+    // alert(`Row ${row}`);
+    for (let column = 0; column < 8; column++) {
+      setTimeout(function () {  
+        ctx.fillStyle = (row+column)%2 ? color2 : color1;
+        ctx.fillRect(x+cote*column,y+cote*row,cote,cote);
+        //ctx.fillStyle = (row+column)%2 ? params.color2 : params.color1;
+        //ctx.fillRect(params.x+params.cote*column,params.y+params.cote*row,params.cote,params.cote);
+        }, (column+row*8) * 100);        
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function DessinerAnimationContinueEchiquier(x,y,cote) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var h1,h2,colorRGB1,colorRGB2,color1,color2;
+
+  var row=0;
+  var column=0;
+
+  var id=setInterval(
+    function () {
+      if (row==0 && column==0) {
+        h1=Math.random()*360;
+        h2=h1+20+Math.random()*320;
+        if (h1>360) {h1-=360;}
+        if (h2>360) {h2-=360;}
+  
+        colorRGB1=hsv2rgb(h1,1,1);
+        colorRGB2=hsv2rgb(h2,1,1);
+        color1=`rgb(${colorRGB1[0]}, ${colorRGB1[1]}, ${colorRGB1[2]})`;
+        color2=`rgb(${colorRGB2[0]}, ${colorRGB2[1]}, ${colorRGB2[2]})`;
+      }
+      ctx.fillStyle = (row+column)%2 ? color2 : color1;
+      ctx.fillRect(x+cote*column,y+cote*row,cote,cote);
+      column++;
+      if (column==8) {
+        column=0;
+        row++;
+        if (row==8) {
+          row=0;
+        }
+      }
+    }
+  , 15);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1] * 256
+function hsv2rgb(h,s,v) 
+{                              
+  let f= (n,k=(n+h/60)%6) => v - v*s*Math.max( Math.min(k,4-k,1), 0);     
+  return [Math.trunc(f(5)*256),Math.trunc(f(3)*256),Math.trunc(f(1)*256)];       
+}   
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// var color1=`rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`; // "yellow"; // "darkred"
+// colorRGB=hsv2rgb(Math.random()*180+180,1,0.8);
+// var color2=`rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
+
+function DessinerEchiquierHSV(x,y,cote,h1,h2) {
+  //debugger;
+  // var colorRGB=hsv2rgb(Math.random()*180,1,1);
+  // colorRGB=hsv2rgb(Math.random()*180+180,1,0.8);
+
+  if (h1>360) {h1-=360;}
+  if (h2>360) {h2-=360;}
+  
+  var colorRGB1=hsv2rgb(h1,1,1);
+  var colorRGB2=hsv2rgb(h2,1,1);
+  var color1=`rgb(${colorRGB1[0]}, ${colorRGB1[1]}, ${colorRGB1[2]})`; // "yellow"; // "darkred"
+  
+  var color2=`rgb(${colorRGB2[0]}, ${colorRGB2[1]}, ${colorRGB2[2]})`;
+
+  for (var row = 0; row < 8; row++){
+    // alert(`Row ${row}`);
+    for (var column = 0; column < 8; column++){
+      // (async () => await new Promise(resolve => setTimeout(resolve, 500)))();
+      var h1c=h1+row*5+column*5; if (h1c>360) {h1c-=360;}
+      colorRGB1=hsv2rgb(h1c,1,1); color1=`rgb(${colorRGB1[0]}, ${colorRGB1[1]}, ${colorRGB1[2]})`;
+      var h2c=h2+row*5+column*5; if (h2c>360) {h2c-=360;}
+      colorRGB2=hsv2rgb(h2c,1,1); color2=`rgb(${colorRGB2[0]}, ${colorRGB2[1]}, ${colorRGB2[2]})`;
+
+      ctx.fillStyle = (row+column)%2 ? color2 : color1;
+      ctx.fillRect(x+cote*column,y+cote*row,cote,cote);
+     }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function Dessiner16Echiquiers() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const tailleCarre=20;
+
+  var h1=Math.random()*360;
+  // var h2=Math.random()*180+180;
+  var h2=h1+20+Math.random()*320;
+
+  for (m=0; m<4; m++) {
+    for (n=0; n<4; n++) {
+      DessinerEchiquierHSV(20+tailleCarre*9*n,20+tailleCarre*9*m, tailleCarre, h1+40*n, h2+40*m);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+if (canvas.getContext) {
+  ctx=canvas.getContext('2d');
+  Dessiner16Echiquiers();
+}
+
+</script>
+</body>
+</html> 
